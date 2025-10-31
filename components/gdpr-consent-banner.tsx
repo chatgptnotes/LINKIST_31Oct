@@ -114,8 +114,8 @@ export default function GDPRConsentBanner() {
                   We value your privacy
                 </h3>
                 <p className="text-sm text-gray-600">
-                  We use cookies and similar technologies to enhance your experience, analyze usage, and deliver personalized content. 
-                  By clicking "Accept All", you consent to our use of cookies.{' '}
+                  We use cookies and similar technologies to enhance your experience, analyze usage, and deliver personalized content.
+                  You can accept all cookies, reject non-essential cookies, or customize your preferences.{' '}
                   <Link href="/privacy" className="text-blue-600 hover:text-blue-700 underline">
                     Learn more in our Privacy Policy
                   </Link>
@@ -123,29 +123,34 @@ export default function GDPRConsentBanner() {
               </div>
             </div>
             
-            <div className="flex items-center space-x-3 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               <button
                 onClick={() => setShowSettings(true)}
-                className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors order-3 sm:order-1"
                 disabled={loading}
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Customize
               </button>
-              <button
-                onClick={handleRejectAll}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors"
-                disabled={loading}
-              >
-                Reject All
-              </button>
-              <button
-                onClick={handleAcceptAll}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
-                disabled={loading}
-              >
-                {loading ? 'Saving...' : 'Accept All'}
-              </button>
+
+              {/* Primary action buttons grouped together */}
+              <div className="flex gap-3 order-1 sm:order-2">
+                <button
+                  onClick={handleRejectAll}
+                  className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 rounded-lg transition-colors"
+                  disabled={loading}
+                >
+                  Reject All
+                </button>
+                <button
+                  onClick={handleAcceptAll}
+                  className="flex-1 sm:flex-none px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 shadow-lg"
+                  disabled={loading}
+                  style={{ color: '#ffffff', backgroundColor: '#dc2626' }}
+                >
+                  {loading ? 'Saving...' : 'Accept All'}
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -185,12 +190,12 @@ export default function GDPRConsentBanner() {
                 </div>
                 <button
                   onClick={() => setPreferences(prev => ({ ...prev, analytics: !prev.analytics }))}
-                  className={`w-12 h-6 rounded-full transition-colors ${
+                  className={`relative w-12 h-6 rounded-full transition-colors ${
                     preferences.analytics ? 'bg-red-600' : 'bg-gray-300'
                   }`}
                 >
-                  <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                    preferences.analytics ? 'translate-x-7' : 'translate-x-1'
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 ease-in-out pointer-events-none ${
+                    preferences.analytics ? 'left-7' : 'left-1'
                   }`}></div>
                 </button>
               </div>
@@ -204,18 +209,18 @@ export default function GDPRConsentBanner() {
                 </div>
                 <button
                   onClick={() => setPreferences(prev => ({ ...prev, marketing: !prev.marketing }))}
-                  className={`w-12 h-6 rounded-full transition-colors ${
+                  className={`relative w-12 h-6 rounded-full transition-colors ${
                     preferences.marketing ? 'bg-red-600' : 'bg-gray-300'
                   }`}
                 >
-                  <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
-                    preferences.marketing ? 'translate-x-7' : 'translate-x-1'
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 ease-in-out pointer-events-none ${
+                    preferences.marketing ? 'left-7' : 'left-1'
                   }`}></div>
                 </button>
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+            <div className="flex justify-between items-center pt-4 border-t border-gray-200">
               <button
                 onClick={() => setShowSettings(false)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
@@ -223,13 +228,23 @@ export default function GDPRConsentBanner() {
               >
                 Cancel
               </button>
-              <button
-                onClick={handleAcceptSelected}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
-                disabled={loading}
-              >
-                {loading ? 'Saving...' : 'Save Preferences'}
-              </button>
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleAcceptAll}
+                  className="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors disabled:opacity-50 shadow-md"
+                  disabled={loading}
+                  style={{ color: '#ffffff', backgroundColor: '#16a34a' }}
+                >
+                  {loading ? 'Saving...' : 'Accept All'}
+                </button>
+                <button
+                  onClick={handleAcceptSelected}
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                  disabled={loading}
+                >
+                  {loading ? 'Saving...' : 'Save Preferences'}
+                </button>
+              </div>
             </div>
           </div>
         )}
