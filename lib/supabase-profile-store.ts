@@ -46,6 +46,7 @@ export interface SupabaseProfile {
   social_links: Record<string, any>
   display_settings: Record<string, any>
   primary_email: string | null
+  alternate_email: string | null
   mobile_number: string | null
   whatsapp_number: string | null
   custom_url: string | null
@@ -163,6 +164,7 @@ export const SupabaseProfileStore = {
         if (input.preferences.professionalSummary !== undefined) updates.professional_summary = input.preferences.professionalSummary
         if (input.preferences.backgroundImage !== undefined) updates.background_image_url = input.preferences.backgroundImage
         if (input.preferences.whatsappNumber !== undefined) updates.whatsapp_number = input.preferences.whatsappNumber
+        if (input.preferences.secondaryEmail !== undefined) updates.alternate_email = input.preferences.secondaryEmail
 
         updates.company_name = input.company || null
         updates.profile_photo_url = input.avatar_url || null
@@ -194,6 +196,7 @@ export const SupabaseProfileStore = {
           showProfilePhoto: input.preferences.showProfilePhoto ?? true,
           showBackgroundImage: input.preferences.showBackgroundImage ?? true,
           showEmailPublicly: input.preferences.showEmailPublicly ?? true,
+          showSecondaryEmailPublicly: input.preferences.showSecondaryEmailPublicly ?? true,
           showMobilePublicly: input.preferences.showMobilePublicly ?? true,
           showWhatsappPublicly: input.preferences.showWhatsappPublicly ?? false,
           showJobTitle: input.preferences.showJobTitle ?? true,
@@ -258,6 +261,7 @@ export const SupabaseProfileStore = {
       newProfile.profile_photo_url = input.avatar_url || null
       newProfile.background_image_url = input.preferences.backgroundImage || null
       newProfile.primary_email = input.email
+      newProfile.alternate_email = input.preferences.secondaryEmail || null
       newProfile.mobile_number = input.phone_number || null
       newProfile.whatsapp_number = input.preferences.whatsappNumber || null
 
@@ -286,6 +290,7 @@ export const SupabaseProfileStore = {
         showProfilePhoto: input.preferences.showProfilePhoto ?? true,
         showBackgroundImage: input.preferences.showBackgroundImage ?? true,
         showEmailPublicly: input.preferences.showEmailPublicly ?? true,
+        showSecondaryEmailPublicly: input.preferences.showSecondaryEmailPublicly ?? true,
         showMobilePublicly: input.preferences.showMobilePublicly ?? true,
         showWhatsappPublicly: input.preferences.showWhatsappPublicly ?? false,
         showJobTitle: input.preferences.showJobTitle ?? true,

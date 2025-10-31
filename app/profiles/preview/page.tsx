@@ -53,6 +53,7 @@ interface ProfileData {
   youtubeUrl: string;
   // Basic Information toggles
   showEmailPublicly: boolean;
+  showSecondaryEmailPublicly: boolean;
   showMobilePublicly: boolean;
   showWhatsappPublicly: boolean;
   // Professional Information toggles
@@ -150,24 +151,25 @@ export default function ProfilePreviewPage() {
             dribbbleUrl: dbProfile.social_links?.dribbble || '',
             githubUrl: dbProfile.social_links?.github || '',
             youtubeUrl: dbProfile.social_links?.youtube || '',
-            // Read toggle values from saved preferences
-            showEmailPublicly: dbProfile.preferences?.showEmailPublicly ?? true,
-            showMobilePublicly: dbProfile.preferences?.showMobilePublicly ?? true,
-            showWhatsappPublicly: dbProfile.preferences?.showWhatsappPublicly ?? false,
-            showJobTitle: dbProfile.preferences?.showJobTitle ?? true,
-            showCompanyName: dbProfile.preferences?.showCompanyName ?? true,
-            showCompanyWebsite: dbProfile.preferences?.showCompanyWebsite ?? true,
-            showCompanyAddress: dbProfile.preferences?.showCompanyAddress ?? true,
-            showIndustry: dbProfile.preferences?.showIndustry ?? true,
-            showSkills: dbProfile.preferences?.showSkills ?? true,
-            showLinkedin: dbProfile.preferences?.showLinkedin ?? false,
-            showInstagram: dbProfile.preferences?.showInstagram ?? false,
-            showFacebook: dbProfile.preferences?.showFacebook ?? false,
-            showTwitter: dbProfile.preferences?.showTwitter ?? false,
-            showBehance: dbProfile.preferences?.showBehance ?? false,
-            showDribbble: dbProfile.preferences?.showDribbble ?? false,
-            showGithub: dbProfile.preferences?.showGithub ?? false,
-            showYoutube: dbProfile.preferences?.showYoutube ?? false,
+            // Read toggle values from display_settings (preferred) or preferences (fallback)
+            showEmailPublicly: dbProfile.display_settings?.showEmailPublicly ?? dbProfile.preferences?.showEmailPublicly ?? true,
+            showSecondaryEmailPublicly: dbProfile.display_settings?.showSecondaryEmailPublicly ?? dbProfile.preferences?.showSecondaryEmailPublicly ?? true,
+            showMobilePublicly: dbProfile.display_settings?.showMobilePublicly ?? dbProfile.preferences?.showMobilePublicly ?? true,
+            showWhatsappPublicly: dbProfile.display_settings?.showWhatsappPublicly ?? dbProfile.preferences?.showWhatsappPublicly ?? false,
+            showJobTitle: dbProfile.display_settings?.showJobTitle ?? dbProfile.preferences?.showJobTitle ?? true,
+            showCompanyName: dbProfile.display_settings?.showCompanyName ?? dbProfile.preferences?.showCompanyName ?? true,
+            showCompanyWebsite: dbProfile.display_settings?.showCompanyWebsite ?? dbProfile.preferences?.showCompanyWebsite ?? true,
+            showCompanyAddress: dbProfile.display_settings?.showCompanyAddress ?? dbProfile.preferences?.showCompanyAddress ?? true,
+            showIndustry: dbProfile.display_settings?.showIndustry ?? dbProfile.preferences?.showIndustry ?? true,
+            showSkills: dbProfile.display_settings?.showSkills ?? dbProfile.preferences?.showSkills ?? true,
+            showLinkedin: dbProfile.display_settings?.showLinkedin ?? dbProfile.preferences?.showLinkedin ?? false,
+            showInstagram: dbProfile.display_settings?.showInstagram ?? dbProfile.preferences?.showInstagram ?? false,
+            showFacebook: dbProfile.display_settings?.showFacebook ?? dbProfile.preferences?.showFacebook ?? false,
+            showTwitter: dbProfile.display_settings?.showTwitter ?? dbProfile.preferences?.showTwitter ?? false,
+            showBehance: dbProfile.display_settings?.showBehance ?? dbProfile.preferences?.showBehance ?? false,
+            showDribbble: dbProfile.display_settings?.showDribbble ?? dbProfile.preferences?.showDribbble ?? false,
+            showGithub: dbProfile.display_settings?.showGithub ?? dbProfile.preferences?.showGithub ?? false,
+            showYoutube: dbProfile.display_settings?.showYoutube ?? dbProfile.preferences?.showYoutube ?? false,
             profilePhoto: dbProfile.profile_photo_url,
             backgroundImage: dbProfile.background_image_url,
             showProfilePhoto: dbProfile.preferences?.showProfilePhoto ?? true,
@@ -467,7 +469,7 @@ export default function ProfilePreviewPage() {
                         </a>
                       </div>
                     )}
-                    {profileData.showEmailPublicly && profileData.secondaryEmail && (
+                    {profileData.showSecondaryEmailPublicly && profileData.secondaryEmail && (
                       <div className="flex items-start gap-3">
                         <Email className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                         <a href={`mailto:${profileData.secondaryEmail}`} className="text-sm text-gray-700 hover:text-green-600 break-all">

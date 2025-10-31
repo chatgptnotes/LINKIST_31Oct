@@ -137,6 +137,7 @@ export async function POST(request: NextRequest) {
         secondaryEmail: data.secondaryEmail || '',
         whatsappNumber: data.whatsappNumber || '',
         showEmailPublicly: data.showEmailPublicly ?? true,
+        showSecondaryEmailPublicly: data.showSecondaryEmailPublicly ?? true,
         showMobilePublicly: data.showMobilePublicly ?? true,
         showWhatsappPublicly: data.showWhatsappPublicly ?? false,
 

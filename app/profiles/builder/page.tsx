@@ -68,6 +68,7 @@ interface ProfileData {
   mobileNumber: string;
   whatsappNumber: string;
   showEmailPublicly: boolean;
+  showSecondaryEmailPublicly: boolean;
   showMobilePublicly: boolean;
   showWhatsappPublicly: boolean;
 
@@ -315,6 +316,7 @@ function ProfileBuilderContent() {
     mobileNumber: '',
     whatsappNumber: '',
     showEmailPublicly: true,
+    showSecondaryEmailPublicly: true,
     showMobilePublicly: true,
     showWhatsappPublicly: false,
 
@@ -545,6 +547,7 @@ function ProfileBuilderContent() {
                 mobileNumber: mobileDetected.number,
                 whatsappNumber: whatsappDetected.number,
                 showEmailPublicly: profileToEdit.show_email_publicly ?? true,
+                showSecondaryEmailPublicly: profileToEdit.show_secondary_email_publicly ?? true,
                 showMobilePublicly: profileToEdit.show_mobile_publicly ?? true,
                 showWhatsappPublicly: profileToEdit.show_whatsapp_publicly ?? false,
 
@@ -752,16 +755,18 @@ function ProfileBuilderContent() {
           console.log('📞 WhatsApp detected - Code:', whatsappDetected.countryCode, 'Number:', whatsappDetected.number);
 
           // Map database fields to form state
+          const displaySettings = profile.display_settings || {};
           const mappedData = {
             firstName: profile.first_name || '',
             lastName: profile.last_name || '',
             primaryEmail: profile.email || '',
-            secondaryEmail: prefs.secondaryEmail || '',
+            secondaryEmail: profile.alternate_email || '',
             mobileNumber: mobileDetected.number,
             whatsappNumber: whatsappDetected.number,
-            showEmailPublicly: prefs.showEmailPublicly ?? true,
-            showMobilePublicly: prefs.showMobilePublicly ?? true,
-            showWhatsappPublicly: prefs.showWhatsappPublicly ?? false,
+            showEmailPublicly: displaySettings.showEmailPublicly ?? prefs.showEmailPublicly ?? true,
+            showSecondaryEmailPublicly: displaySettings.showSecondaryEmailPublicly ?? prefs.showSecondaryEmailPublicly ?? true,
+            showMobilePublicly: displaySettings.showMobilePublicly ?? prefs.showMobilePublicly ?? true,
+            showWhatsappPublicly: displaySettings.showWhatsappPublicly ?? prefs.showWhatsappPublicly ?? false,
 
             jobTitle: prefs.jobTitle || '',
             companyName: profile.company || '',
@@ -872,6 +877,7 @@ function ProfileBuilderContent() {
           secondaryEmail: profileData.secondaryEmail,
           whatsappNumber: fullWhatsappNumber,
           showEmailPublicly: toggleName === 'showEmailPublicly' ? value : profileData.showEmailPublicly,
+          showSecondaryEmailPublicly: toggleName === 'showSecondaryEmailPublicly' ? value : profileData.showSecondaryEmailPublicly,
           showMobilePublicly: toggleName === 'showMobilePublicly' ? value : profileData.showMobilePublicly,
           showWhatsappPublicly: toggleName === 'showWhatsappPublicly' ? value : profileData.showWhatsappPublicly,
           jobTitle: profileData.jobTitle,
@@ -991,6 +997,7 @@ function ProfileBuilderContent() {
           secondaryEmail: profileData.secondaryEmail,
           whatsappNumber: fullWhatsappNumber,
           showEmailPublicly: profileData.showEmailPublicly,
+          showSecondaryEmailPublicly: profileData.showSecondaryEmailPublicly,
           showMobilePublicly: profileData.showMobilePublicly,
           showWhatsappPublicly: profileData.showWhatsappPublicly,
           jobTitle: profileData.jobTitle,
@@ -1329,6 +1336,20 @@ function ProfileBuilderContent() {
                             autoComplete="email"
                           />
                           <Plus className="absolute right-3 top-2.5 w-5 h-5 text-gray-400" />
+                        </div>
+                        <div className="flex items-center justify-end mt-2">
+                          <div className="flex items-center gap-2">
+                            <label className="flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={profileData.showSecondaryEmailPublicly}
+                                onChange={(e) => handleToggleAutoSave('showSecondaryEmailPublicly', e.target.checked)}
+                                className="sr-only peer"
+                              />
+                              <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                            </label>
+                            <span className="text-sm text-gray-700">Show publicly</span>
+                          </div>
                         </div>
                       </div>
                     </div>

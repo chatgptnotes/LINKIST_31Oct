@@ -52,6 +52,7 @@ interface ProfileData {
   youtubeUrl: string;
   // Basic Information toggles
   showEmailPublicly: boolean;
+  showSecondaryEmailPublicly: boolean;
   showMobilePublicly: boolean;
   showWhatsappPublicly: boolean;
   // Professional Information toggles
@@ -123,7 +124,7 @@ export default function ProfilePreviewPage() {
             firstName: dbProfile.firstName || '',
             lastName: dbProfile.lastName || '',
             primaryEmail: dbProfile.email || '',
-            secondaryEmail: '',
+            secondaryEmail: dbProfile.alternate_email || '',
             mobileNumber: dbProfile.phone || '',
             whatsappNumber: '',
             jobTitle: dbProfile.title || '',
@@ -143,24 +144,25 @@ export default function ProfilePreviewPage() {
             dribbbleUrl: '',
             githubUrl: dbProfile.github || '',
             youtubeUrl: dbProfile.youtube || '',
-            // Read toggle values from saved preferences
-            showEmailPublicly: prefs.showEmailPublicly ?? true,
-            showMobilePublicly: prefs.showMobilePublicly ?? true,
-            showWhatsappPublicly: prefs.showWhatsappPublicly ?? false,
-            showJobTitle: prefs.showJobTitle ?? true,
-            showCompanyName: prefs.showCompanyName ?? true,
-            showCompanyWebsite: prefs.showCompanyWebsite ?? true,
-            showCompanyAddress: prefs.showCompanyAddress ?? true,
-            showIndustry: prefs.showIndustry ?? true,
-            showSkills: prefs.showSkills ?? true,
-            showLinkedin: prefs.showLinkedin ?? false,
-            showInstagram: prefs.showInstagram ?? false,
-            showFacebook: prefs.showFacebook ?? false,
-            showTwitter: prefs.showTwitter ?? false,
-            showBehance: prefs.showBehance ?? false,
-            showDribbble: prefs.showDribbble ?? false,
-            showGithub: prefs.showGithub ?? false,
-            showYoutube: prefs.showYoutube ?? false,
+            // Read toggle values from display_settings (preferred) or preferences (fallback)
+            showEmailPublicly: dbProfile.display_settings?.showEmailPublicly ?? prefs.showEmailPublicly ?? true,
+            showSecondaryEmailPublicly: dbProfile.display_settings?.showSecondaryEmailPublicly ?? prefs.showSecondaryEmailPublicly ?? true,
+            showMobilePublicly: dbProfile.display_settings?.showMobilePublicly ?? prefs.showMobilePublicly ?? true,
+            showWhatsappPublicly: dbProfile.display_settings?.showWhatsappPublicly ?? prefs.showWhatsappPublicly ?? false,
+            showJobTitle: dbProfile.display_settings?.showJobTitle ?? prefs.showJobTitle ?? true,
+            showCompanyName: dbProfile.display_settings?.showCompanyName ?? prefs.showCompanyName ?? true,
+            showCompanyWebsite: dbProfile.display_settings?.showCompanyWebsite ?? prefs.showCompanyWebsite ?? true,
+            showCompanyAddress: dbProfile.display_settings?.showCompanyAddress ?? prefs.showCompanyAddress ?? true,
+            showIndustry: dbProfile.display_settings?.showIndustry ?? prefs.showIndustry ?? true,
+            showSkills: dbProfile.display_settings?.showSkills ?? prefs.showSkills ?? true,
+            showLinkedin: dbProfile.display_settings?.showLinkedin ?? prefs.showLinkedin ?? false,
+            showInstagram: dbProfile.display_settings?.showInstagram ?? prefs.showInstagram ?? false,
+            showFacebook: dbProfile.display_settings?.showFacebook ?? prefs.showFacebook ?? false,
+            showTwitter: dbProfile.display_settings?.showTwitter ?? prefs.showTwitter ?? false,
+            showBehance: dbProfile.display_settings?.showBehance ?? prefs.showBehance ?? false,
+            showDribbble: dbProfile.display_settings?.showDribbble ?? prefs.showDribbble ?? false,
+            showGithub: dbProfile.display_settings?.showGithub ?? prefs.showGithub ?? false,
+            showYoutube: dbProfile.display_settings?.showYoutube ?? prefs.showYoutube ?? false,
             profilePhoto: dbProfile.profileImage || null,
             backgroundImage: dbProfile.coverImage || null,
             showProfilePhoto: prefs.showProfilePhoto ?? true,
@@ -269,6 +271,7 @@ export default function ProfilePreviewPage() {
       profileData.jobTitle && profileData.showJobTitle ? `TITLE:${profileData.jobTitle}` : '',
       profileData.companyName && profileData.showCompanyName ? `ORG:${profileData.companyName}` : '',
       profileData.primaryEmail && profileData.showEmailPublicly ? `EMAIL;TYPE=INTERNET:${profileData.primaryEmail}` : '',
+      profileData.secondaryEmail && profileData.showSecondaryEmailPublicly ? `EMAIL;TYPE=INTERNET:${profileData.secondaryEmail}` : '',
       profileData.mobileNumber && profileData.showMobilePublicly ? `TEL;TYPE=CELL:${profileData.mobileNumber}` : '',
       profileData.whatsappNumber && profileData.showWhatsappPublicly ? `TEL;TYPE=WHATSAPP:${profileData.whatsappNumber}` : '',
       profileData.companyWebsite && profileData.showCompanyWebsite ? `URL:${profileData.companyWebsite}` : '',
@@ -424,6 +427,14 @@ export default function ProfilePreviewPage() {
                         <Email className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
                         <a href={`mailto:${profileData.primaryEmail}`} className="text-sm text-gray-700 hover:text-blue-600 break-all">
                           {profileData.primaryEmail}
+                        </a>
+                      </div>
+                    )}
+                    {profileData.showSecondaryEmailPublicly && profileData.secondaryEmail && (
+                      <div className="flex items-start gap-3">
+                        <Email className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <a href={`mailto:${profileData.secondaryEmail}`} className="text-sm text-gray-700 hover:text-green-600 break-all">
+                          {profileData.secondaryEmail}
                         </a>
                       </div>
                     )}
