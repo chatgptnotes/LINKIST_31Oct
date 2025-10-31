@@ -42,6 +42,7 @@
     "framer-motion": "^12.23.22",
     "gsap": "^3.13.0",
     "html2canvas": "^1.4.1",
+    "jose": "^6.1.0",
     "jspdf": "^3.0.2",
     "leaflet": "^1.9.4",
     "lightningcss": "^1.30.2",
