@@ -1886,13 +1886,20 @@ function ProfileBuilderContent() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Company Website</label>
-                        <input
-                          type="url"
-                          value={profileData.companyWebsite}
-                          onChange={(e) => setProfileData({ ...profileData, companyWebsite: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                          placeholder="https://techcorp.com"
-                        />
+                        <div className="flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <span className="pl-3 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://</span>
+                          <input
+                            type="text"
+                            value={profileData.companyWebsite.replace('https://', '')}
+                            onChange={(e) => {
+                              const domain = e.target.value;
+                              const fullUrl = domain ? `https://${domain}` : '';
+                              setProfileData({ ...profileData, companyWebsite: fullUrl });
+                            }}
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="ratioxlabs.com"
+                          />
+                        </div>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="flex items-center cursor-pointer">
                             <input
@@ -2330,21 +2337,23 @@ function ProfileBuilderContent() {
                       {/* LinkedIn */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">LinkedIn Profile</label>
-                        <div className="relative">
-                          <LinkedIn className="absolute left-3 top-2.5 w-5 h-5 text-blue-700" />
+                        <div className="relative flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <LinkedIn className="absolute left-3 top-2.5 w-5 h-5 text-blue-700 pointer-events-none" />
+                          <span className="pl-10 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://linkedin.com/in/</span>
                           <input
-                            type="url"
-                            value={profileData.linkedinUrl}
+                            type="text"
+                            value={profileData.linkedinUrl.replace('https://linkedin.com/in/', '')}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const handle = e.target.value;
+                              const fullUrl = handle ? `https://linkedin.com/in/${handle}` : '';
                               setProfileData({
                                 ...profileData,
-                                linkedinUrl: value,
-                                showLinkedin: value.trim().length > 0
+                                linkedinUrl: fullUrl,
+                                showLinkedin: handle.trim().length > 0
                               });
                             }}
-                            className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                            placeholder="https://linkedin.com/in/sarah-johnson"
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="sarah-johnson"
                           />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
@@ -2364,21 +2373,23 @@ function ProfileBuilderContent() {
                       {/* Instagram */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Instagram</label>
-                        <div className="relative">
-                          <Instagram className="absolute left-3 top-2.5 w-5 h-5 text-pink-600" />
+                        <div className="relative flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <Instagram className="absolute left-3 top-2.5 w-5 h-5 text-pink-600 pointer-events-none" />
+                          <span className="pl-10 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://instagram.com/</span>
                           <input
-                            type="url"
-                            value={profileData.instagramUrl}
+                            type="text"
+                            value={profileData.instagramUrl.replace('https://instagram.com/', '')}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const handle = e.target.value;
+                              const fullUrl = handle ? `https://instagram.com/${handle}` : '';
                               setProfileData({
                                 ...profileData,
-                                instagramUrl: value,
-                                showInstagram: value.trim().length > 0
+                                instagramUrl: fullUrl,
+                                showInstagram: handle.trim().length > 0
                               });
                             }}
-                            className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                            placeholder="https://instagram.com/yourhandle"
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="yourhandle"
                           />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
@@ -2398,21 +2409,23 @@ function ProfileBuilderContent() {
                       {/* Facebook */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Facebook</label>
-                        <div className="relative">
-                          <Facebook className="absolute left-3 top-2.5 w-5 h-5 text-blue-600" />
+                        <div className="relative flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <Facebook className="absolute left-3 top-2.5 w-5 h-5 text-blue-600 pointer-events-none" />
+                          <span className="pl-10 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://facebook.com/</span>
                           <input
-                            type="url"
-                            value={profileData.facebookUrl}
+                            type="text"
+                            value={profileData.facebookUrl.replace('https://facebook.com/', '')}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const handle = e.target.value;
+                              const fullUrl = handle ? `https://facebook.com/${handle}` : '';
                               setProfileData({
                                 ...profileData,
-                                facebookUrl: value,
-                                showFacebook: value.trim().length > 0
+                                facebookUrl: fullUrl,
+                                showFacebook: handle.trim().length > 0
                               });
                             }}
-                            className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                            placeholder="https://facebook.com/yourprofile"
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="yourprofile"
                           />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
@@ -2432,21 +2445,23 @@ function ProfileBuilderContent() {
                       {/* Twitter/X */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">X (Twitter)</label>
-                        <div className="relative">
-                          <Twitter className="absolute left-3 top-2.5 w-5 h-5 text-gray-900" />
+                        <div className="relative flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <Twitter className="absolute left-3 top-2.5 w-5 h-5 text-gray-900 pointer-events-none" />
+                          <span className="pl-10 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://x.com/</span>
                           <input
-                            type="url"
-                            value={profileData.twitterUrl}
+                            type="text"
+                            value={profileData.twitterUrl.replace('https://x.com/', '')}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const handle = e.target.value;
+                              const fullUrl = handle ? `https://x.com/${handle}` : '';
                               setProfileData({
                                 ...profileData,
-                                twitterUrl: value,
-                                showTwitter: value.trim().length > 0
+                                twitterUrl: fullUrl,
+                                showTwitter: handle.trim().length > 0
                               });
                             }}
-                            className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                            placeholder="https://x.com/sarah_product"
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="sarah_product"
                           />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
@@ -2475,21 +2490,23 @@ function ProfileBuilderContent() {
                       {/* Behance */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Behance Portfolio</label>
-                        <div className="relative">
-                          <div className="absolute left-3 top-2.5 text-blue-500 font-bold text-sm">Bē</div>
+                        <div className="relative flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <div className="absolute left-3 top-2.5 text-blue-500 font-bold text-sm pointer-events-none">Bē</div>
+                          <span className="pl-10 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://behance.net/</span>
                           <input
-                            type="url"
-                            value={profileData.behanceUrl}
+                            type="text"
+                            value={profileData.behanceUrl.replace('https://behance.net/', '')}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const handle = e.target.value;
+                              const fullUrl = handle ? `https://behance.net/${handle}` : '';
                               setProfileData({
                                 ...profileData,
-                                behanceUrl: value,
-                                showBehance: value.trim().length > 0
+                                behanceUrl: fullUrl,
+                                showBehance: handle.trim().length > 0
                               });
                             }}
-                            className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                            placeholder="https://behance.net/yourportfolio"
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="yourportfolio"
                           />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
@@ -2509,23 +2526,25 @@ function ProfileBuilderContent() {
                       {/* Dribbble */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Dribbble</label>
-                        <div className="relative">
-                          <svg className="absolute left-3 top-2.5 w-5 h-5 text-pink-500" viewBox="0 0 24 24" fill="currentColor">
+                        <div className="relative flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <svg className="absolute left-3 top-2.5 w-5 h-5 text-pink-500 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 24C5.385 24 0 18.615 0 12S5.385 0 12 0s12 5.385 12 12-5.385 12-12 12zm10.12-10.358c-.35-.11-3.17-.953-6.384-.438 1.34 3.684 1.887 6.684 1.992 7.308 2.3-1.555 3.936-4.02 4.395-6.87zm-6.115 7.808c-.153-.9-.75-4.032-2.19-7.77l-.066.02c-5.79 2.015-7.86 6.025-8.04 6.4 1.73 1.358 3.92 2.166 6.29 2.166 1.42 0 2.77-.29 4-.816zm-11.62-2.58c.232-.4 3.045-5.055 8.332-6.765.135-.045.27-.084.405-.12-.26-.585-.54-1.167-.832-1.74C7.17 11.775 2.206 11.71 1.756 11.7l-.004.312c0 2.633.998 5.037 2.634 6.855zm-2.42-8.955c.46.008 4.683.026 9.477-1.248-1.698-3.018-3.53-5.558-3.8-5.928-2.868 1.35-5.01 3.99-5.676 7.17zM9.6 2.052c.282.38 2.145 2.914 3.822 6 3.645-1.365 5.19-3.44 5.373-3.702-1.81-1.61-4.19-2.586-6.795-2.586-.825 0-1.63.1-2.4.285zm10.335 3.483c-.218.29-1.935 2.493-5.724 4.04.24.49.47.985.68 1.486.08.18.15.36.22.53 3.41-.43 6.8.26 7.14.33-.02-2.42-.88-4.64-2.31-6.38z"/>
                           </svg>
+                          <span className="pl-10 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://dribbble.com/</span>
                           <input
-                            type="url"
-                            value={profileData.dribbbleUrl}
+                            type="text"
+                            value={profileData.dribbbleUrl.replace('https://dribbble.com/', '')}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const handle = e.target.value;
+                              const fullUrl = handle ? `https://dribbble.com/${handle}` : '';
                               setProfileData({
                                 ...profileData,
-                                dribbbleUrl: value,
-                                showDribbble: value.trim().length > 0
+                                dribbbleUrl: fullUrl,
+                                showDribbble: handle.trim().length > 0
                               });
                             }}
-                            className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                            placeholder="https://dribbble.com/yourprofile"
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="yourprofile"
                           />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
@@ -2545,21 +2564,23 @@ function ProfileBuilderContent() {
                       {/* GitHub */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">GitHub</label>
-                        <div className="relative">
-                          <GitHub className="absolute left-3 top-2.5 w-5 h-5 text-gray-900" />
+                        <div className="relative flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <GitHub className="absolute left-3 top-2.5 w-5 h-5 text-gray-900 pointer-events-none" />
+                          <span className="pl-10 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://github.com/</span>
                           <input
-                            type="url"
-                            value={profileData.githubUrl}
+                            type="text"
+                            value={profileData.githubUrl.replace('https://github.com/', '')}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const handle = e.target.value;
+                              const fullUrl = handle ? `https://github.com/${handle}` : '';
                               setProfileData({
                                 ...profileData,
-                                githubUrl: value,
-                                showGithub: value.trim().length > 0
+                                githubUrl: fullUrl,
+                                showGithub: handle.trim().length > 0
                               });
                             }}
-                            className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                            placeholder="https://github.com/sarahjohnson"
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="sarahjohnson"
                           />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
@@ -2579,21 +2600,23 @@ function ProfileBuilderContent() {
                       {/* YouTube */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">YouTube Channel</label>
-                        <div className="relative">
-                          <YouTube className="absolute left-3 top-2.5 w-5 h-5 text-red-600" />
+                        <div className="relative flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-red-500 focus-within:border-red-500">
+                          <YouTube className="absolute left-3 top-2.5 w-5 h-5 text-red-600 pointer-events-none" />
+                          <span className="pl-10 pr-1 py-2 text-gray-500 text-sm select-none whitespace-nowrap">https://youtube.com/@</span>
                           <input
-                            type="url"
-                            value={profileData.youtubeUrl}
+                            type="text"
+                            value={profileData.youtubeUrl.replace('https://youtube.com/@', '')}
                             onChange={(e) => {
-                              const value = e.target.value;
+                              const handle = e.target.value;
+                              const fullUrl = handle ? `https://youtube.com/@${handle}` : '';
                               setProfileData({
                                 ...profileData,
-                                youtubeUrl: value,
-                                showYoutube: value.trim().length > 0
+                                youtubeUrl: fullUrl,
+                                showYoutube: handle.trim().length > 0
                               });
                             }}
-                            className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
-                            placeholder="https://youtube.com/@yourchannel"
+                            className="flex-1 px-2 py-2 border-0 outline-none rounded-r-lg"
+                            placeholder="yourchannel"
                           />
                         </div>
                         <div className="flex items-center gap-2 mt-2">

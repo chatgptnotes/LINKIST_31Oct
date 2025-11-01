@@ -277,6 +277,7 @@ export default function ProfilePreviewPage() {
       profileData.companyWebsite && profileData.showCompanyWebsite ? `URL:${profileData.companyWebsite}` : '',
       profileData.companyAddress && profileData.showCompanyAddress ? `ADR;TYPE=WORK:;;${profileData.companyAddress};;;;` : '',
       customUrl ? `URL:${customUrl}` : '',
+      profileData.professionalSummary ? `NOTE:${profileData.professionalSummary.replace(/\n/g, '\\n')}` : '',
       'END:VCARD'
     ].filter(line => line).join('\n');
 
