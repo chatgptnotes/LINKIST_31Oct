@@ -126,7 +126,7 @@ export const RateLimits = {
   // Auth endpoints (login, register)
   auth: {
     interval: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5, // 5 attempts per 15 minutes
+    maxRequests: 50, // 50 attempts per 15 minutes (increased for production)
   },
   // OTP/verification endpoints
   otp: {
