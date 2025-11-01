@@ -58,7 +58,9 @@ export async function GET(
       coverImage: profile.background_image_url || '',
       companyLogo: profile.company_logo_url || '',
       email: profile.primary_email || profile.email || '',
+      alternate_email: profile.alternate_email || '',
       phone: profile.mobile_number || profile.phone_number || '',
+      whatsapp: profile.whatsapp_number || '',
       website: profile.company_website || '',
       location: profile.company_address || '',
       linkedin: socialLinks.linkedin || '',
@@ -71,6 +73,7 @@ export async function GET(
       industry: profile.industry || '',
       // Include visibility preferences
       preferences: preferences,
+      display_settings: profile.display_settings || {},
     };
 
     // Track profile view (optional - add analytics here)
