@@ -117,7 +117,7 @@ export default function Navbar() {
               className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center text-white text-sm font-semibold">
-                {userData.firstName && userData.lastName
+                {userData.firstName
                   ? `${userData.firstName[0]}`.toUpperCase()
                   : userData.email?.[0].toUpperCase() || 'U'}
               </div>

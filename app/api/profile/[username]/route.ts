@@ -50,7 +50,7 @@ export async function GET(
       username: profile.custom_url,
       firstName: profile.first_name || '',
       lastName: profile.last_name || '',
-      fullName: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email?.split('@')[0] || '',
+      fullName: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.first_name || profile.email?.split('@')[0] || '',
       title: profile.job_title || '',
       company: profile.company_name || profile.company || '',
       bio: profile.professional_summary || '',

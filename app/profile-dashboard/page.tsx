@@ -505,17 +505,20 @@ export default function AccountPage() {
                   {(() => {
                     const baseUrl = getBaseUrl();
 
-                    // Generate username from custom_url or firstname-lastname format
+                    // Generate username from custom_url or first name
                     let username = 'your-profile';
 
                     if (profileData?.customUrl) {
                       // Use custom_url from database
                       username = profileData.customUrl;
-                    } else if (user?.first_name && user?.last_name) {
-                      // Generate from firstname-lastname
-                      username = `${user.first_name}-${user.last_name}`.toLowerCase().replace(/\s+/g, '-');
+                    } else if (user?.first_name) {
+                      // Use first name as username
+                      username = user.first_name.toLowerCase().replace(/\s+/g, '-');
+                    } else if (profileData?.first_name) {
+                      // Check profile data for first name
+                      username = profileData.first_name.toLowerCase().replace(/\s+/g, '-');
                     } else if (profileData?.email) {
-                      // Fallback to email username
+                      // Last resort fallback to email username
                       username = profileData.email.split('@')[0];
                     }
 
@@ -529,17 +532,20 @@ export default function AccountPage() {
               onClick={() => {
                 const baseUrl = getBaseUrl();
 
-                // Generate username from custom_url or firstname-lastname format
+                // Generate username from custom_url or first name
                 let username = 'your-profile';
 
                 if (profileData?.customUrl) {
                   // Use custom_url from database
                   username = profileData.customUrl;
-                } else if (user?.first_name && user?.last_name) {
-                  // Generate from firstname-lastname
-                  username = `${user.first_name}-${user.last_name}`.toLowerCase().replace(/\s+/g, '-');
+                } else if (user?.first_name) {
+                  // Use first name as username
+                  username = user.first_name.toLowerCase().replace(/\s+/g, '-');
+                } else if (profileData?.first_name) {
+                  // Check profile data for first name
+                  username = profileData.first_name.toLowerCase().replace(/\s+/g, '-');
                 } else if (profileData?.email) {
-                  // Fallback to email username
+                  // Last resort fallback to email username
                   username = profileData.email.split('@')[0];
                 }
 

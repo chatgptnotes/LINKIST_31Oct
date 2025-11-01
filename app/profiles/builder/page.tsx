@@ -308,6 +308,14 @@ function ProfileBuilderContent() {
   const [showIndustryDropdown, setShowIndustryDropdown] = useState(false);
   const [showSubDomainDropdown, setShowSubDomainDropdown] = useState(false);
 
+  // Upload progress states
+  const [profilePhotoUploadProgress, setProfilePhotoUploadProgress] = useState(0);
+  const [bannerImageUploadProgress, setBannerImageUploadProgress] = useState(0);
+  const [companyLogoUploadProgress, setCompanyLogoUploadProgress] = useState(0);
+  const [isUploadingProfilePhoto, setIsUploadingProfilePhoto] = useState(false);
+  const [isUploadingBannerImage, setIsUploadingBannerImage] = useState(false);
+  const [isUploadingCompanyLogo, setIsUploadingCompanyLogo] = useState(false);
+
   const [profileData, setProfileData] = useState<ProfileData>({
     firstName: '',
     lastName: '',
@@ -430,6 +438,91 @@ function ProfileBuilderContent() {
       reader.onerror = () => reject(new Error('Failed to read file'));
     });
   };
+
+  // Aggressively compress image to max 800px dimension with 70% quality and convert to Base64
+  const compressImageToBase64 = async (
+    file: File,
+    progressCallback: (progress: number) => void
+  ): Promise<string> => {
+    const MAX_DIMENSION = 800; // Max width or height (aggressive compression)
+    const QUALITY = 0.7; // 70% quality (aggressive compression)
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          // File reading is ~50% of the process
+          const progress = Math.round((event.loaded / event.total) * 50);
+          progressCallback(progress);
+        }
+      };
+
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+
+        img.onload = () => {
+          try {
+            progressCallback(60); // Image loaded, starting compression
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            if (!ctx) {
+              reject(new Error('Failed to get canvas context'));
+              return;
+            }
+
+            // Calculate new dimensions maintaining aspect ratio
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_DIMENSION) {
+                height = Math.floor(height * (MAX_DIMENSION / width));
+                width = MAX_DIMENSION;
+              }
+            } else {
+              if (height > MAX_DIMENSION) {
+                width = Math.floor(width * (MAX_DIMENSION / height));
+                height = MAX_DIMENSION;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            progressCallback(75); // Resizing...
+
+            // Draw resized image
+            ctx.drawImage(img, 0, 0, width, height);
+
+            progressCallback(90); // Converting to Base64...
+
+            // Convert canvas to Base64 with aggressive compression
+            const base64String = canvas.toDataURL('image/jpeg', QUALITY);
+
+            const originalSizeKB = file.size / 1024;
+            const compressedSizeKB = (base64String.length * 0.75) / 1024; // Approximate Base64 size
+
+            console.log(`Image compressed: ${originalSizeKB.toFixed(0)}KB → ${compressedSizeKB.toFixed(0)}KB (${((compressedSizeKB / originalSizeKB) * 100).toFixed(0)}% of original)`);
+
+            progressCallback(100);
+            resolve(base64String);
+          } catch (error) {
+            reject(error instanceof Error ? error : new Error('Compression failed'));
+          }
+        };
+
+        img.onerror = () => reject(new Error('Failed to load image'));
+      };
+
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
 
   // Handle photo file upload
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1713,35 +1806,62 @@ function ProfileBuilderContent() {
                             id="company-logo-upload"
                             accept="image/png,image/jpeg,image/jpg"
                             className="hidden"
-                            onChange={(e) => {
+                            onChange={async (e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
+                                try {
+                                  setIsUploadingCompanyLogo(true);
+                                  setCompanyLogoUploadProgress(0);
+
+                                  // Compress and convert to Base64
+                                  const base64String = await compressImageToBase64(file, (progress) => {
+                                    setCompanyLogoUploadProgress(progress);
+                                  });
+
                                   setProfileData(prev => ({
                                     ...prev,
-                                    companyLogo: reader.result as string
+                                    companyLogo: base64String
                                   }));
-                                };
-                                reader.readAsDataURL(file);
+
+                                  toast.success('Company logo uploaded successfully!');
+                                } catch (error) {
+                                  console.error('Company logo upload error:', error);
+                                  toast.error(error instanceof Error ? error.message : 'Failed to upload company logo');
+                                } finally {
+                                  setIsUploadingCompanyLogo(false);
+                                  setCompanyLogoUploadProgress(0);
+                                }
                               }
                             }}
                           />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const input = document.getElementById('company-logo-upload') as HTMLInputElement;
-                              if (input) {
-                                input.click();
-                              }
-                            }}
-                            className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center justify-center gap-2"
-                            style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
-                          >
-                            <Upload className="w-4 h-4" />
-                            Upload Logo
-                          </button>
-                          <span className="text-xs text-gray-500 text-center sm:text-left">PNG, JPG up to 2MB</span>
+                          <div className="w-full sm:w-auto">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const input = document.getElementById('company-logo-upload') as HTMLInputElement;
+                                if (input) {
+                                  input.click();
+                                }
+                              }}
+                              disabled={isUploadingCompanyLogo}
+                              className="w-full sm:w-auto px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
+                            >
+                              <Upload className="w-4 h-4" />
+                              {isUploadingCompanyLogo ? `Uploading... ${companyLogoUploadProgress}%` : 'Upload Logo'}
+                            </button>
+                            {isUploadingCompanyLogo && (
+                              <div className="mt-2 w-full">
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className="bg-red-600 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${companyLogoUploadProgress}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            <span className="text-xs text-gray-500 text-center sm:text-left block mt-2">PNG, JPG up to 2MB</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -2382,17 +2502,31 @@ function ProfileBuilderContent() {
                               id="profile-photo-upload"
                               accept="image/png,image/jpeg,image/jpg,image/gif"
                               className="hidden"
-                              onChange={(e) => {
+                              onChange={async (e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => {
+                                  try {
+                                    setIsUploadingProfilePhoto(true);
+                                    setProfilePhotoUploadProgress(0);
+
+                                    // Compress and convert to Base64
+                                    const base64String = await compressImageToBase64(file, (progress) => {
+                                      setProfilePhotoUploadProgress(progress);
+                                    });
+
                                     setProfileData(prev => ({
                                       ...prev,
-                                      profilePhoto: reader.result as string
+                                      profilePhoto: base64String
                                     }));
-                                  };
-                                  reader.readAsDataURL(file);
+
+                                    toast.success('Profile photo uploaded successfully!');
+                                  } catch (error) {
+                                    console.error('Profile photo upload error:', error);
+                                    toast.error(error instanceof Error ? error.message : 'Failed to upload profile photo');
+                                  } finally {
+                                    setIsUploadingProfilePhoto(false);
+                                    setProfilePhotoUploadProgress(0);
+                                  }
                                 }
                               }}
                             />
@@ -2404,12 +2538,23 @@ function ProfileBuilderContent() {
                                   input.click();
                                 }
                               }}
-                              className="mt-4 px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-2 mx-auto"
+                              disabled={isUploadingProfilePhoto}
+                              className="mt-4 px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                               style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
                             >
                               <Upload className="w-4 h-4" />
-                              Upload New Photo
+                              {isUploadingProfilePhoto ? `Uploading... ${profilePhotoUploadProgress}%` : 'Upload New Photo'}
                             </button>
+                            {isUploadingProfilePhoto && (
+                              <div className="mt-2 w-full">
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className="bg-red-600 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${profilePhotoUploadProgress}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
                             <p className="text-xs text-gray-500 mt-2">JPG, PNG or GIF up to 10MB</p>
                           </div>
                         </div>
@@ -2479,17 +2624,31 @@ function ProfileBuilderContent() {
                           id="background-image-upload"
                           accept="image/png,image/jpeg,image/jpg"
                           className="hidden"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const reader = new FileReader();
-                              reader.onloadend = () => {
+                              try {
+                                setIsUploadingBannerImage(true);
+                                setBannerImageUploadProgress(0);
+
+                                // Compress and convert to Base64
+                                const base64String = await compressImageToBase64(file, (progress) => {
+                                  setBannerImageUploadProgress(progress);
+                                });
+
                                 setProfileData(prev => ({
                                   ...prev,
-                                  backgroundImage: reader.result as string
+                                  backgroundImage: base64String
                                 }));
-                              };
-                              reader.readAsDataURL(file);
+
+                                toast.success('Banner image uploaded successfully!');
+                              } catch (error) {
+                                console.error('Banner image upload error:', error);
+                                toast.error(error instanceof Error ? error.message : 'Failed to upload banner image');
+                              } finally {
+                                setIsUploadingBannerImage(false);
+                                setBannerImageUploadProgress(0);
+                              }
                             }
                           }}
                         />
@@ -2501,12 +2660,23 @@ function ProfileBuilderContent() {
                               input.click();
                             }
                           }}
-                          className="mt-4 px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-2 mx-auto"
+                          disabled={isUploadingBannerImage}
+                          className="mt-4 px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-2 mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
                           style={{ backgroundColor: '#dc2626', color: '#ffffff' }}
                         >
                           <Upload className="w-4 h-4" />
-                          {profileData.backgroundImage ? 'Change Banner' : 'Upload Banner'}
+                          {isUploadingBannerImage ? `Uploading... ${bannerImageUploadProgress}%` : (profileData.backgroundImage ? 'Change Banner' : 'Upload Banner')}
                         </button>
+                        {isUploadingBannerImage && (
+                          <div className="mt-2 w-full">
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-red-600 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${bannerImageUploadProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
                         <p className="text-xs text-gray-500 mt-2 text-center">JPG or PNG up to 15MB</p>
                       </div>
 

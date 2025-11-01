@@ -187,11 +187,11 @@ export default function ProfilePreviewPage() {
             if (dbProfile.custom_url) {
               // Use custom_url from database (same as dashboard)
               username = dbProfile.custom_url;
-            } else if (dbProfile.first_name && dbProfile.last_name) {
-              // Generate from firstname-lastname
-              username = `${dbProfile.first_name}-${dbProfile.last_name}`.toLowerCase().replace(/\s+/g, '-');
+            } else if (dbProfile.first_name) {
+              // Use first name as username
+              username = dbProfile.first_name.toLowerCase().replace(/\s+/g, '-');
             } else if (dbProfile.email) {
-              // Fallback to email username
+              // Last resort fallback to email username
               username = dbProfile.email.split('@')[0];
             }
 

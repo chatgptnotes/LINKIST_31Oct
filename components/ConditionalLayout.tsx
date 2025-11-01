@@ -177,13 +177,15 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
                   className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-semibold">
-                    {userData.first_name && userData.last_name
+                    {userData.first_name
                       ? `${userData.first_name[0]}`.toUpperCase()
                       : userData.email?.[0].toUpperCase() || 'U'}
                   </div>
                   <span className="hidden md:block text-sm text-gray-700 font-medium">
                     {userData.first_name && userData.last_name
                       ? `${userData.first_name.toLowerCase()}${userData.last_name.toLowerCase()}`
+                      : userData.first_name
+                      ? userData.first_name.toLowerCase()
                       : userData.email?.split('@')[0] || 'user'}
                   </span>
                   {/* Dropdown Arrow */}

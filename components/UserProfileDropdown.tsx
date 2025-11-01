@@ -65,6 +65,8 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
   const getInitials = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+    } else if (user?.firstName) {
+      return user.firstName[0].toUpperCase();
     } else if (user?.email) {
       return user.email[0].toUpperCase();
     }
@@ -75,6 +77,8 @@ export default function UserProfileDropdown({ user }: UserProfileDropdownProps) 
   const getDisplayName = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName} ${user.lastName}`;
+    } else if (user?.firstName) {
+      return user.firstName;
     } else if (user?.email) {
       return user.email.split('@')[0];
     }
