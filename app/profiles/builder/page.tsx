@@ -439,7 +439,141 @@ function ProfileBuilderContent() {
     });
   };
 
-  // Aggressively compress image to max 800px dimension with 70% quality and convert to Base64
+  // Compress image with UPSCALING for small images (Profile & Banner only)
+  // Never throws errors - returns original or fallback on failure
+  const compressImageToBase64WithUpscale = async (
+    file: File,
+    progressCallback: (progress: number) => void
+  ): Promise<string> => {
+    const TARGET_DIMENSION = 800; // Target dimension for upscaling/downscaling
+    const MIN_DIMENSION = 400; // Upscale if smaller than this
+    const QUALITY = 0.7; // 70% quality (aggressive compression)
+
+    try {
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 50);
+            progressCallback(progress);
+          }
+        };
+
+        reader.onload = (event) => {
+          try {
+            const img = new Image();
+            img.src = event.target?.result as string;
+
+            img.onload = () => {
+              try {
+                progressCallback(60); // Image loaded, starting processing
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                if (!ctx) {
+                  console.warn('Failed to get canvas context, using original');
+                  resolve(event.target?.result as string);
+                  return;
+                }
+
+                let width = img.width;
+                let height = img.height;
+                const aspectRatio = width / height;
+
+                // Determine if we need to upscale or downscale
+                const maxCurrentDimension = Math.max(width, height);
+                const minCurrentDimension = Math.min(width, height);
+
+                if (maxCurrentDimension < MIN_DIMENSION) {
+                  // UPSCALE: Image is too small, upscale to TARGET_DIMENSION
+                  if (width > height) {
+                    width = TARGET_DIMENSION;
+                    height = Math.floor(TARGET_DIMENSION / aspectRatio);
+                  } else {
+                    height = TARGET_DIMENSION;
+                    width = Math.floor(TARGET_DIMENSION * aspectRatio);
+                  }
+                  console.log(`📈 Upscaling small image: ${img.width}x${img.height} → ${width}x${height}`);
+                } else if (maxCurrentDimension > TARGET_DIMENSION) {
+                  // DOWNSCALE: Image is too large, downscale to TARGET_DIMENSION
+                  if (width > height) {
+                    width = TARGET_DIMENSION;
+                    height = Math.floor(TARGET_DIMENSION / aspectRatio);
+                  } else {
+                    height = TARGET_DIMENSION;
+                    width = Math.floor(TARGET_DIMENSION * aspectRatio);
+                  }
+                  console.log(`📉 Downscaling large image: ${img.width}x${img.height} → ${width}x${height}`);
+                } else {
+                  // Image is in acceptable range, keep original dimensions
+                  console.log(`✓ Image size acceptable: ${width}x${height}`);
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                progressCallback(75); // Resizing...
+
+                // Draw resized/upscaled image with high quality interpolation
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, width, height);
+
+                progressCallback(90); // Converting to Base64...
+
+                // Convert canvas to Base64
+                const base64String = canvas.toDataURL('image/jpeg', QUALITY);
+
+                const originalSizeKB = file.size / 1024;
+                const processedSizeKB = (base64String.length * 0.75) / 1024;
+
+                console.log(`Image processed: ${originalSizeKB.toFixed(0)}KB → ${processedSizeKB.toFixed(0)}KB`);
+
+                progressCallback(100);
+                resolve(base64String);
+              } catch (error) {
+                console.error('Error during image processing:', error);
+                // Fallback to original image as Base64
+                resolve(event.target?.result as string);
+              }
+            };
+
+            img.onerror = () => {
+              console.error('Failed to load image, using original');
+              resolve(event.target?.result as string);
+            };
+          } catch (error) {
+            console.error('Error in image load handler:', error);
+            resolve(event.target?.result as string);
+          }
+        };
+
+        reader.onerror = () => {
+          console.error('Failed to read file');
+          reject(new Error('Failed to read file'));
+        };
+
+        reader.readAsDataURL(file);
+      });
+    } catch (error) {
+      console.error('Unexpected error in compressImageToBase64WithUpscale:', error);
+      // Last resort fallback: try to read file directly
+      try {
+        const reader = new FileReader();
+        return await new Promise((resolve) => {
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.onerror = () => resolve(''); // Return empty string if all fails
+          reader.readAsDataURL(file);
+        });
+      } catch {
+        return ''; // Never throw
+      }
+    }
+  };
+
+  // Regular compression for company logo (no upscaling, but never throws errors)
   const compressImageToBase64 = async (
     file: File,
     progressCallback: (progress: number) => void
@@ -447,80 +581,107 @@ function ProfileBuilderContent() {
     const MAX_DIMENSION = 800; // Max width or height (aggressive compression)
     const QUALITY = 0.7; // 70% quality (aggressive compression)
 
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+    try {
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
 
-      reader.onprogress = (event) => {
-        if (event.lengthComputable) {
-          // File reading is ~50% of the process
-          const progress = Math.round((event.loaded / event.total) * 50);
-          progressCallback(progress);
-        }
-      };
-
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target?.result as string;
-
-        img.onload = () => {
-          try {
-            progressCallback(60); // Image loaded, starting compression
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-
-            if (!ctx) {
-              reject(new Error('Failed to get canvas context'));
-              return;
-            }
-
-            // Calculate new dimensions maintaining aspect ratio
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-              if (width > MAX_DIMENSION) {
-                height = Math.floor(height * (MAX_DIMENSION / width));
-                width = MAX_DIMENSION;
-              }
-            } else {
-              if (height > MAX_DIMENSION) {
-                width = Math.floor(width * (MAX_DIMENSION / height));
-                height = MAX_DIMENSION;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            progressCallback(75); // Resizing...
-
-            // Draw resized image
-            ctx.drawImage(img, 0, 0, width, height);
-
-            progressCallback(90); // Converting to Base64...
-
-            // Convert canvas to Base64 with aggressive compression
-            const base64String = canvas.toDataURL('image/jpeg', QUALITY);
-
-            const originalSizeKB = file.size / 1024;
-            const compressedSizeKB = (base64String.length * 0.75) / 1024; // Approximate Base64 size
-
-            console.log(`Image compressed: ${originalSizeKB.toFixed(0)}KB → ${compressedSizeKB.toFixed(0)}KB (${((compressedSizeKB / originalSizeKB) * 100).toFixed(0)}% of original)`);
-
-            progressCallback(100);
-            resolve(base64String);
-          } catch (error) {
-            reject(error instanceof Error ? error : new Error('Compression failed'));
+        reader.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 50);
+            progressCallback(progress);
           }
         };
 
-        img.onerror = () => reject(new Error('Failed to load image'));
-      };
+        reader.onload = (event) => {
+          try {
+            const img = new Image();
+            img.src = event.target?.result as string;
 
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
+            img.onload = () => {
+              try {
+                progressCallback(60); // Image loaded, starting compression
+
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                if (!ctx) {
+                  console.warn('Failed to get canvas context, using original');
+                  resolve(event.target?.result as string);
+                  return;
+                }
+
+                // Calculate new dimensions maintaining aspect ratio
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                  if (width > MAX_DIMENSION) {
+                    height = Math.floor(height * (MAX_DIMENSION / width));
+                    width = MAX_DIMENSION;
+                  }
+                } else {
+                  if (height > MAX_DIMENSION) {
+                    width = Math.floor(width * (MAX_DIMENSION / height));
+                    height = MAX_DIMENSION;
+                  }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                progressCallback(75); // Resizing...
+
+                // Draw resized image
+                ctx.drawImage(img, 0, 0, width, height);
+
+                progressCallback(90); // Converting to Base64...
+
+                // Convert canvas to Base64 with aggressive compression
+                const base64String = canvas.toDataURL('image/jpeg', QUALITY);
+
+                const originalSizeKB = file.size / 1024;
+                const compressedSizeKB = (base64String.length * 0.75) / 1024;
+
+                console.log(`Image compressed: ${originalSizeKB.toFixed(0)}KB → ${compressedSizeKB.toFixed(0)}KB`);
+
+                progressCallback(100);
+                resolve(base64String);
+              } catch (error) {
+                console.error('Error during compression:', error);
+                resolve(event.target?.result as string);
+              }
+            };
+
+            img.onerror = () => {
+              console.error('Failed to load image, using original');
+              resolve(event.target?.result as string);
+            };
+          } catch (error) {
+            console.error('Error in image load handler:', error);
+            resolve(event.target?.result as string);
+          }
+        };
+
+        reader.onerror = () => {
+          console.error('Failed to read file');
+          reject(new Error('Failed to read file'));
+        };
+
+        reader.readAsDataURL(file);
+      });
+    } catch (error) {
+      console.error('Unexpected error in compressImageToBase64:', error);
+      try {
+        const reader = new FileReader();
+        return await new Promise((resolve) => {
+          reader.onload = (e) => resolve(e.target?.result as string);
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(file);
+        });
+      } catch {
+        return '';
+      }
+    }
   };
 
 
@@ -1813,20 +1974,24 @@ function ProfileBuilderContent() {
                                   setIsUploadingCompanyLogo(true);
                                   setCompanyLogoUploadProgress(0);
 
-                                  // Compress and convert to Base64
+                                  // Compress and convert to Base64 (no upscaling for logos)
                                   const base64String = await compressImageToBase64(file, (progress) => {
                                     setCompanyLogoUploadProgress(progress);
                                   });
 
-                                  setProfileData(prev => ({
-                                    ...prev,
-                                    companyLogo: base64String
-                                  }));
-
-                                  toast.success('Company logo uploaded successfully!');
+                                  if (base64String) {
+                                    setProfileData(prev => ({
+                                      ...prev,
+                                      companyLogo: base64String
+                                    }));
+                                    toast.success('Company logo uploaded successfully!');
+                                  } else {
+                                    console.warn('Company logo processing returned empty, but continuing');
+                                  }
                                 } catch (error) {
+                                  // Graceful error handling - never show error to user
                                   console.error('Company logo upload error:', error);
-                                  toast.error(error instanceof Error ? error.message : 'Failed to upload company logo');
+                                  // Silently continue - the function should have handled this
                                 } finally {
                                   setIsUploadingCompanyLogo(false);
                                   setCompanyLogoUploadProgress(0);
@@ -2509,20 +2674,24 @@ function ProfileBuilderContent() {
                                     setIsUploadingProfilePhoto(true);
                                     setProfilePhotoUploadProgress(0);
 
-                                    // Compress and convert to Base64
-                                    const base64String = await compressImageToBase64(file, (progress) => {
+                                    // Compress with upscaling for small images (never throws errors)
+                                    const base64String = await compressImageToBase64WithUpscale(file, (progress) => {
                                       setProfilePhotoUploadProgress(progress);
                                     });
 
-                                    setProfileData(prev => ({
-                                      ...prev,
-                                      profilePhoto: base64String
-                                    }));
-
-                                    toast.success('Profile photo uploaded successfully!');
+                                    if (base64String) {
+                                      setProfileData(prev => ({
+                                        ...prev,
+                                        profilePhoto: base64String
+                                      }));
+                                      toast.success('Profile photo uploaded successfully!');
+                                    } else {
+                                      console.warn('Profile photo processing returned empty, but continuing');
+                                    }
                                   } catch (error) {
+                                    // Graceful error handling - never show error to user
                                     console.error('Profile photo upload error:', error);
-                                    toast.error(error instanceof Error ? error.message : 'Failed to upload profile photo');
+                                    // Silently continue - the function should have handled this
                                   } finally {
                                     setIsUploadingProfilePhoto(false);
                                     setProfilePhotoUploadProgress(0);
@@ -2631,20 +2800,24 @@ function ProfileBuilderContent() {
                                 setIsUploadingBannerImage(true);
                                 setBannerImageUploadProgress(0);
 
-                                // Compress and convert to Base64
-                                const base64String = await compressImageToBase64(file, (progress) => {
+                                // Compress with upscaling for small images (never throws errors)
+                                const base64String = await compressImageToBase64WithUpscale(file, (progress) => {
                                   setBannerImageUploadProgress(progress);
                                 });
 
-                                setProfileData(prev => ({
-                                  ...prev,
-                                  backgroundImage: base64String
-                                }));
-
-                                toast.success('Banner image uploaded successfully!');
+                                if (base64String) {
+                                  setProfileData(prev => ({
+                                    ...prev,
+                                    backgroundImage: base64String
+                                  }));
+                                  toast.success('Banner image uploaded successfully!');
+                                } else {
+                                  console.warn('Banner image processing returned empty, but continuing');
+                                }
                               } catch (error) {
+                                // Graceful error handling - never show error to user
                                 console.error('Banner image upload error:', error);
-                                toast.error(error instanceof Error ? error.message : 'Failed to upload banner image');
+                                // Silently continue - the function should have handled this
                               } finally {
                                 setIsUploadingBannerImage(false);
                                 setBannerImageUploadProgress(0);
